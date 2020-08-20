@@ -63,3 +63,112 @@ kubectl get nodes -o wide
 kubectl get deployments -o wide
 ```
 
+### Few samples for deploying Pod, Deployment, Service
+```
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+EOF
+
+## DELETE THE POD ADBOVE ##
+
+cat << EOF | kubectl create -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15.4
+        ports:
+        - containerPort: 80
+EOF
+
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+spec:
+  containers:
+  - name: busybox
+    image: radial/busyboxplus:curl
+    args:
+    - sleep
+    - "1000"
+EOF
+
+kubectl get pods -o wide
+
+kubectl exec busybox -- curl $nginx_pod_ip
+
+## CREATING DEPLOYMENTS (DESIRED STATE, SCALING< ROLLING UPDATE, SELF-HEALING) ##
+cat <<EOF | kubectl create -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15.4
+        ports:
+        - containerPort: 80
+EOF
+
+kubectl get deployments
+
+kubectl describe deployment nginx-deployment
+
+## K8 SERVICES (REPLICAs MOVED/CREATED/DESTROYED)##
+cat << EOF | kubectl create -f -
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30080
+  type: NodePort
+EOF
+
+kubectl get svc
+
+curl localhost:30080
+
+kubectl delete svc nginx-service
+```
