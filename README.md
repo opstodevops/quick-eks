@@ -34,6 +34,12 @@ eksctl create cluster --name my-dev-cluster --version 1.16 --region us-east-1 --
 eksctl get cluster
 ```
 
+### Creating kubernetes cluster with supported custom AMIs using eksctl
+<https://eksctl.io/usage/custom-ami-support/>
+```
+eksctl create cluster --name my-eks-cluster --region us-east-1 --zones us-east-1a,us-east-1b --nodegroup-name eks-workers --node-type t2.micro --nodes 3 --nodes-min 1 --nodes-max 4 --managed --node-ami-family AmazonLinux2
+```
+
 ### Enable CloudWatch Logging for kubernetes cluster (Optional)
 ```
 eksctl utils update-cluster-logging --region=us-east-1 --cluster=my-dev-cluster --enable-types all --approve
@@ -76,7 +82,7 @@ spec:
     image: nginx
 EOF
 
-## DELETE THE POD ADBOVE ##
+## DELETE THE POD ABOVE ##
 
 cat << EOF | kubectl create -f -
 apiVersion: apps/v1
